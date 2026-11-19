@@ -1,0 +1,190 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>I Love You ❤️</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: black;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        button {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+
+            padding: 12px 30px;
+            border: 1px solid #ffb6c1;
+            border-radius: 30px;
+
+            background: black;
+            color: #ffb6c1;
+            font-size: 15px;
+
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        button:hover {
+            background: #2b101d;
+        }
+    </style>
+</head>
+
+<body>
+
+<canvas id="heart"></canvas>
+
+<button onclick="replayHeart()">Replay ❤️</button>
+
+<script>
+
+const canvas = document.getElementById("heart");
+const ctx = canvas.getContext("2d");
+
+let points = [];
+let progress = 0;
+let animationFrame = null;
+
+function resize() {
+
+    const dpr = window.devicePixelRatio || 1;
+
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    draw();
+}
+
+function createHeart() {
+
+    points = [];
+
+    for (let scale = 11; scale <= 16; scale++) {
+
+        for (let i = 0; i < 120; i++) {
+
+            // Slightly stagger each text layer
+            let t = (i + scale * 0.12) * Math.PI * 2 / 120;
+
+            let x = 16 * Math.sin(t) ** 3;
+
+            let y = 13 * Math.cos(t)
+                - 5 * Math.cos(2 * t)
+                - 2 * Math.cos(3 * t)
+                - Math.cos(4 * t);
+
+            points.push({
+                x: x * scale,
+                y: y * scale
+            });
+        }
+    }
+}
+
+function draw() {
+
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+
+    ctx.clearRect(0, 0, w, h);
+
+    let heartScale = Math.min(
+        w / 700,
+        h / 720
+    );
+
+    ctx.save();
+
+    ctx.translate(
+        w / 2,
+        h / 2 - 40
+    );
+
+    ctx.scale(heartScale, -heartScale);
+
+    for (let i = 0; i < progress; i++) {
+
+        let p = points[i];
+
+        ctx.save();
+
+        ctx.translate(p.x, p.y);
+        ctx.scale(1, -1);
+
+        ctx.fillStyle = "#ffb6c1";
+        ctx.font = "7px Arial";
+        ctx.textAlign = "center";
+
+        ctx.globalAlpha = 0.95;
+
+        ctx.shadowColor = "#ffb6c1";
+        ctx.shadowBlur = 2;
+
+        ctx.fillText("I love you", 0, 0);
+
+        ctx.restore();
+    }
+
+    ctx.restore();
+}
+
+function animate() {
+
+    progress = Math.min(progress + 3, points.length);
+
+    draw();
+
+    if (progress < points.length) {
+
+        animationFrame = requestAnimationFrame(animate);
+
+    } else {
+
+        animationFrame = null;
+
+    }
+}
+
+function replayHeart() {
+
+    if (animationFrame !== null) {
+        cancelAnimationFrame(animationFrame);
+    }
+
+    progress = 0;
+
+    draw();
+
+    animate();
+}
+
+window.addEventListener("resize", resize);
+
+createHeart();
+
+resize();
+
+animate();
+
+</script>
+
+</body>
+</html>
